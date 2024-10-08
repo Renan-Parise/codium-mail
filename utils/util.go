@@ -63,8 +63,6 @@ func StartConsumer() {
 				continue
 			}
 
-			log.Printf("Received an email request: %+v", email)
-
 			err := SendEmail(email)
 			if err != nil {
 				log.Printf("Failed to send email to %s: %s", email.Address, err)

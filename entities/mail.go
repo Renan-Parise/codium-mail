@@ -1,8 +1,9 @@
 package entities
 
 import (
-	"errors"
 	"regexp"
+
+	"github.com/Renan-Parise/codium-mail/errors"
 )
 
 type Email struct {
@@ -13,19 +14,19 @@ type Email struct {
 
 func (e *Email) Validate() error {
 	if e.Address == "" {
-		return errors.New("email address is required")
+		return errors.NewValidationError("address", "email address is required")
 	}
 
 	if !regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`).MatchString(e.Address) {
-		return errors.New("invalid email address")
+		return errors.NewValidationError("address", "invalid email address")
 	}
 
 	if e.Subject == "" {
-		return errors.New("email subject is required")
+		return errors.NewValidationError("subject", "email subject is required")
 	}
 
 	if e.Body == "" {
-		return errors.New("email body is required")
+		return errors.NewValidationError("body", "email body is required")
 	}
 
 	return nil
