@@ -35,7 +35,7 @@ func (ec *EmailController) Send(c *gin.Context) {
 	err := ec.emailService.PublishEmail(email)
 	if err != nil {
 		utils.GetLogger().WithError(err).Error("Failed to publish email")
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to publish email"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 

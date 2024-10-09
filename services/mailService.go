@@ -2,6 +2,8 @@ package services
 
 import (
 	"encoding/json"
+	"log"
+	"time"
 
 	"github.com/Renan-Parise/codium-mail/entities"
 	"github.com/Renan-Parise/codium-mail/errors"
@@ -22,18 +24,20 @@ func NewEmailService() EmailService {
 func (s *emailService) PublishEmail(email entities.Email) error {
 	conn, err := amqp.Dial(utils.GetRabbitMQURL())
 	if err != nil {
+		log.Printf("Failed to connect to RabbitMQ: %v", err)
 		return errors.NewServiceError("Failed to connect to RabbitMQ: " + err.Error())
 	}
 	defer conn.Close()
 
-	ch, err := conn.Channel()
+	channel, err := conn.Channel()
 	if err != nil {
-		return errors.NewServiceError("Failed to open a channel: " + err.Error())
+		log.Printf("Failed to open channel: %v", err)
+		return errors.NewServiceError("Failed to open channel: " + err.Error())
 	}
-	defer ch.Close()
+	defer channel.Close()
 
-	q, err := ch.QueueDeclare(
-		"email_queue",
+	_, err = channel.QueueDeclare(
+		utils.GetEmailQueueName(),
 		true,
 		false,
 		false,
@@ -41,7 +45,14 @@ func (s *emailService) PublishEmail(email entities.Email) error {
 		nil,
 	)
 	if err != nil {
-		return errors.NewServiceError("Failed to declare a queue: " + err.Error())
+		log.Printf("Failed to declare queue: %v", err)
+		return errors.NewServiceError("Failed to declare queue: " + err.Error())
+	}
+
+	err = channel.Confirm(false)
+	if err != nil {
+		log.Printf("Failed to set channel to confirm mode: %v", err)
+		return errors.NewServiceError("Failed to set channel to confirm mode: " + err.Error())
 	}
 
 	body, err := json.Marshal(email)
@@ -49,15 +60,37 @@ func (s *emailService) PublishEmail(email entities.Email) error {
 		return errors.NewServiceError("Failed to marshal email: " + err.Error())
 	}
 
-	err = ch.Publish(
+	confirmChan := channel.NotifyPublish(make(chan amqp.Confirmation, 1))
+
+	log.Printf("Publishing message: %s", string(body))
+
+	err = channel.Publish(
 		"",
-		q.Name,
+		utils.GetEmailQueueName(),
 		false,
 		false,
 		amqp.Publishing{
-			ContentType: "application/json",
-			Body:        body,
+			ContentType:  "application/json",
+			Body:         body,
+			DeliveryMode: amqp.Persistent,
 		},
 	)
-	return err
+	if err != nil {
+		log.Printf("Failed to publish message: %v", err)
+		return errors.NewServiceError("Failed to publish message: " + err.Error())
+	}
+
+	select {
+	case confirm := <-confirmChan:
+		if confirm.Ack {
+			log.Printf("Message published and acknowledged")
+			return nil
+		} else {
+			log.Printf("Message published but not acknowledged")
+			return errors.NewServiceError("Message not acknowledged by broker")
+		}
+	case <-time.After(5 * time.Second):
+		log.Printf("Timeout waiting for publisher confirmation")
+		return errors.NewServiceError("Timeout waiting for publisher confirmation")
+	}
 }

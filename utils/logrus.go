@@ -7,22 +7,22 @@ import (
 	"go.elastic.co/apm/module/apmlogrus"
 )
 
-var log = logrus.New()
+var logging = logrus.New()
 
 func InitElasticAPM() {
 	logrus.AddHook(&apmlogrus.Hook{})
 }
 
 func InitLogger() {
-	log.Out = os.Stdout
+	logging.Out = os.Stdout
 
-	log.SetLevel(logrus.InfoLevel)
+	logging.SetLevel(logrus.InfoLevel)
 
-	log.SetFormatter(&logrus.JSONFormatter{})
+	logging.SetFormatter(&logrus.JSONFormatter{})
 
-	log.AddHook(&apmlogrus.Hook{})
+	logging.AddHook(&apmlogrus.Hook{})
 }
 
 func GetLogger() *logrus.Logger {
-	return log
+	return logging
 }

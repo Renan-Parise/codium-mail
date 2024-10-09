@@ -2,6 +2,9 @@ package main
 
 import (
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/Renan-Parise/codium-mail/routes"
 	"github.com/Renan-Parise/codium-mail/utils"
@@ -16,8 +19,19 @@ func main() {
 
 	utils.InitLogger()
 
-	go utils.StartConsumer()
+	readyChan := make(chan struct{})
+	go utils.StartConsumer(readyChan)
+	<-readyChan
 
 	router := routes.SetupRouter()
-	router.Run("127.0.0.1:8182")
+	go func() {
+		if err := router.Run("127.0.0.1:8182"); err != nil {
+			log.Fatal("Failed to run server: ", err)
+		}
+	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	log.Println("Shutting down application...")
 }
