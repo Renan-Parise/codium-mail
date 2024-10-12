@@ -2,22 +2,22 @@ package utils
 
 import (
 	"encoding/json"
-	"log"
 
 	"github.com/Renan-Parise/codium-mail/agent"
 	"github.com/Renan-Parise/codium-mail/entities"
+	"github.com/Renan-Parise/codium-mail/errors"
 	"github.com/streadway/amqp"
 )
 
 func StartConsumer(readyChan chan struct{}) {
 	conn, err := amqp.Dial(GetRabbitMQURL())
 	if err != nil {
-		log.Fatalf("Failed to connect to RabbitMQ: %s", err)
+		errors.NewConsumerError("Failed to connect to RabbitMQ: " + err.Error())
 	}
 
 	ch, err := conn.Channel()
 	if err != nil {
-		log.Fatalf("Failed to open a channel: %s", err)
+		errors.NewConsumerError("Failed to open a channel: " + err.Error())
 	}
 
 	q, err := ch.QueueDeclare(
@@ -29,7 +29,7 @@ func StartConsumer(readyChan chan struct{}) {
 		nil,
 	)
 	if err != nil {
-		log.Fatalf("Failed to declare a queue: %s", err)
+		errors.NewConsumerError("Failed to declare a queue: " + err.Error())
 	}
 
 	msgs, err := ch.Consume(
@@ -42,7 +42,7 @@ func StartConsumer(readyChan chan struct{}) {
 		nil,
 	)
 	if err != nil {
-		log.Fatalf("Failed to register a consumer: %s", err)
+		errors.NewConsumerError("Failed to register a consumer: " + err.Error())
 	}
 
 	err = ch.Qos(
@@ -51,31 +51,25 @@ func StartConsumer(readyChan chan struct{}) {
 		false,
 	)
 	if err != nil {
-		log.Fatalf("Failed to set QoS: %s", err)
+		errors.NewConsumerError("Failed to set QoS: " + err.Error())
 	}
 
-	log.Println("Consumer is ready, starting to process messages...")
 	close(readyChan)
 
 	for d := range msgs {
-		log.Printf("Received a message: %s", string(d.Body))
-
 		var email entities.Email
 		if err := json.Unmarshal(d.Body, &email); err != nil {
-			log.Printf("Error decoding JSON: %s", err)
+			errors.NewConsumerError("Failed to unmarshal email: " + err.Error())
 			d.Nack(false, false)
 			continue
 		}
 
 		err := agent.SendEmail(email)
 		if err != nil {
-			log.Printf("Failed to send email to %s: %s", email.Address, err)
+			errors.NewConsumerError("Failed to send email: " + err.Error())
 			d.Nack(false, true)
 		} else {
-			log.Printf("Email sent to %s", email.Address)
 			d.Ack(false)
 		}
 	}
-
-	log.Println("Message channel closed, shutting down consumer.")
 }

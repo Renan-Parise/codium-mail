@@ -46,6 +46,19 @@ func NewDatabaseError(reason string) *DatabaseError {
 	return &DatabaseError{Reason: reason, Method: getCallerMethodName()}
 }
 
+type ConsumerError struct {
+	Reason string
+	Method string
+}
+
+func (e *ConsumerError) Error() string {
+	return fmt.Sprintf("Consumer error: %s. Event occurred in method: %s.", e.Reason, e.Method)
+}
+
+func NewConsumerError(reason string) *ConsumerError {
+	return &ConsumerError{Reason: reason, Method: getCallerMethodName()}
+}
+
 type ServiceError struct {
 	Reason string
 	Method string

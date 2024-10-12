@@ -32,8 +32,7 @@ func SendEmail(email entities.Email) error {
 
 	err := smtp.SendMail("smtp.gmail.com:587", auth, from, to, message)
 	if err != nil {
-		log.Printf("Failed to send email to %s: %v", email.Address, err)
-		return err
+		errors.NewServiceError("Failed to send email: " + err.Error())
 	}
 
 	return nil
