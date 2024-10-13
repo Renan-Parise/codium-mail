@@ -29,10 +29,10 @@ A robust mail service built with Go, Gin framework, and RabbitMQ. This service h
 
 ### Clone the Repository
 
-```bash
-    git clone
-    cd mail-service
-```
+    ```bash
+        git clone https://github.com/Renan-Parise/codium-mail.git
+        cd codium-mail
+    ```
 
 ### Install Dependencies
 
