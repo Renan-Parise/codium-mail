@@ -1,4 +1,4 @@
-module github.com/Renan-Parise/codium-mail
+module github.com/Renan-Parise/mail
 
 go 1.22.2
 

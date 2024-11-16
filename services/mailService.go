@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/Renan-Parise/codium-mail/entities"
-	"github.com/Renan-Parise/codium-mail/errors"
-	"github.com/Renan-Parise/codium-mail/utils"
+	"github.com/Renan-Parise/mail/entities"
+	"github.com/Renan-Parise/mail/errors"
+	"github.com/Renan-Parise/mail/utils"
 	"github.com/streadway/amqp"
 )
 

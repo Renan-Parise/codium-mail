@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"github.com/Renan-Parise/codium-mail/controllers"
+	"github.com/Renan-Parise/mail/controllers"
 	"github.com/gin-gonic/gin"
 )
 

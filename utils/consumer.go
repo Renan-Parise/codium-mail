@@ -3,9 +3,9 @@ package utils
 import (
 	"encoding/json"
 
-	"github.com/Renan-Parise/codium-mail/agent"
-	"github.com/Renan-Parise/codium-mail/entities"
-	"github.com/Renan-Parise/codium-mail/errors"
+	"github.com/Renan-Parise/mail/agent"
+	"github.com/Renan-Parise/mail/entities"
+	"github.com/Renan-Parise/mail/errors"
 	"github.com/streadway/amqp"
 )
 

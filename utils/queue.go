@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"github.com/Renan-Parise/codium-mail/errors"
+	"github.com/Renan-Parise/mail/errors"
 	"github.com/streadway/amqp"
 )
 

@@ -6,8 +6,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/Renan-Parise/codium-mail/routes"
-	"github.com/Renan-Parise/codium-mail/utils"
+	"github.com/Renan-Parise/mail/routes"
+	"github.com/Renan-Parise/mail/utils"
 	"github.com/joho/godotenv"
 )
 

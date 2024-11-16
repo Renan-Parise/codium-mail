@@ -2,17 +2,14 @@ package agent
 
 import (
 	"fmt"
-	"log"
 	"net/smtp"
 	"os"
 
-	"github.com/Renan-Parise/codium-mail/entities"
-	"github.com/Renan-Parise/codium-mail/errors"
+	"github.com/Renan-Parise/mail/entities"
+	"github.com/Renan-Parise/mail/errors"
 )
 
 func SendEmail(email entities.Email) error {
-	log.Println("SendEmail function called")
-
 	gmailUser := os.Getenv("GMAIL_USERNAME")
 	gmailPass := os.Getenv("GMAIL_PASSWORD")
 
